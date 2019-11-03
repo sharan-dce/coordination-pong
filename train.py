@@ -31,8 +31,8 @@ def run(agents, pong):
 	done = False
 	total_reward_l, total_reward_r = 0.0, 0.0
 	while not done:
-		state_a = [np.expand_dims(pong.get_screen(), axis = -1)]
-		state_a = [np.expand_dims(pong.get_screen(), axis = -1)]
+		state_a = tf.Variable([np.expand_dims(pong.get_screen(), axis = -1)])
+		state_b = tf.Variable([np.expand_dims(pong.get_screen(), axis = -1)])
 		q_values_a = agents[0].forward_prop(state_a)
 		q_values_b = agents[1].forward_prop(state_b)
 
@@ -49,8 +49,8 @@ def train_episode(agents, target_agents, pong):
 	pong.reset()
 	for agent in agents + target_agents:
 		agent.reset()
-	state_a = [np.expand_dims(pong.get_screen(), axis = -1)]
-	state_a = [np.expand_dims(pong.get_screen(), axis = -1)]
+	state_a = tf.Variable([np.expand_dims(pong.get_screen(), axis = -1)])
+	state_b = tf.Variable([np.expand_dims(pong.get_screen(), axis = -1)])
 
 	_ = target_agents[0].forward_prop(state_a)
 	_ = target_agents[1].forward_prop(state_b)
@@ -74,8 +74,8 @@ def train_episode(agents, target_agents, pong):
 		if done:
 			loss += tf.square(reward_l - q_values_a[0, action_a]) + tf.square(reward_r - q_values_b[0, action_b])
 		else:
-			state_a = [np.expand_dims(pong.get_screen(), axis = -1)]
-			state_a = [np.expand_dims(pong.get_screen(), axis = -1)]
+			state_a = tf.Variable([np.expand_dims(pong.get_screen(), axis = -1)])
+			state_b = tf.Variable([np.expand_dims(pong.get_screen(), axis = -1)])
 
 			target_q_values_a = target_agents[0].forward_prop(state_a)
 			target_q_values_b = target_agents[1].forward_prop(state_b)
@@ -88,7 +88,7 @@ def update_target_network(agents, target_agents):
 		target_agent.set_weights(agent.get_weights())
 
 def main():
-	description = 'no_par_shar lr: {}, exp_prob: {}'.format(config.LEARNING_RATE, config.EXPLORE_PROB)
+	description = 'lr: {}, exp_prob: {}'.format(config.LEARNING_RATE, config.EXPLORE_PROB)
 	pong = Pong(description)
 	
 	agents = [Agent(3), Agent(3)]
@@ -101,7 +101,7 @@ def main():
 	os.system('rm -rf ./logs && mkdir ckpt')
 	log_dir = './logs'
 	summary_writer = tf.summary.create_file_writer(log_dir)
-	os.system('tensorboard --logdir ./logs/ &')
+	os.system('tensorboard --logdir=./logs  --port={} &'.format(config.PORT))
 	# to initialize, we run a random episode
 	run(agents, pong)
 	run(target_agents, pong)

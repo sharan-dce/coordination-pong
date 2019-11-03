@@ -108,7 +108,7 @@ class Pong:
 			if check(points[i][1], self.window_y) and check(points[i][0], self.window_x):
 				screen[points[i][1], points[i][0]] = intensity_controls[i]
 
-		return screen
+		return screen.astype(np.float32)
 
 	def move(self, l_move, r_move):
 		# move can be 0, 1 or 2
